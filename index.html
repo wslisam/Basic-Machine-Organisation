@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Machine Organisation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); padding: 24px; margin-bottom: 24px; }
+        .cycle-step { transition: all 0.3s ease; }
+        .cycle-step:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .guide-box { border-left: 4px solid #f59e0b; background-color: #fffbeb; padding: 16px; border-radius: 0 8px 8px 0; margin-top: 20px; transition: all 0.3s ease; }
+        .guide-box:hover { box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.2); }
+        .explanation-box { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .explanation-box.active { display: block; }
+        .math-unit { display: inline-flex; align-items: center; justify-content: center; padding: 0.25rem 0.75rem; background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.375rem; color: #1d4ed8; font-family: monospace; font-size: 0.875rem; margin: 0.25rem; white-space: nowrap; }
+        .math-unit sup { font-size: 0.7em; line-height: 0; vertical-align: super; }
+        .quiz-option { transition: all 0.2s; }
+        .quiz-option:hover:not(.disabled) { background-color: #eff6ff; border-color: #93c5fd; }
+        .quiz-option.selected { border-color: #3b82f6; background-color: #eff6ff; }
+        .quiz-option.correct { border-color: #22c55e; background-color: #f0fdf4; }
+        .quiz-option.incorrect { border-color: #ef4444; background-color: #fef2f2; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center max-w-5xl">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fas fa-desktop"></i>
+                <span id="title">Basic Machine Organisation</span>
+            </h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-medium opacity-90 not-italic">Created by Sam Li</span>
+                <button onclick="toggleLanguage()" class="bg-white text-blue-700 px-4 py-1.5 rounded-full hover:bg-blue-50 transition font-bold shadow-sm" id="langBtn">中文</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4 max-w-5xl mt-6">
+        
+        <!-- Navigation Tabs -->
+        <div class="flex space-x-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+            <button onclick="openTab('hardware')" class="tab-btn active bg-blue-600 text-white px-5 py-2.5 rounded-lg shadow font-medium whitespace-nowrap transition" id="tabHardware">Hardware & I/O</button>
+            <button onclick="openTab('cpu')" class="tab-btn bg-white text-gray-600 px-5 py-2.5 rounded-lg shadow hover:bg-gray-50 font-medium whitespace-nowrap transition" id="tabCpu">CPU & Cycle</button>
+            <button onclick="openTab('memory')" class="tab-btn bg-white text-gray-600 px-5 py-2.5 rounded-lg shadow hover:bg-gray-50 font-medium whitespace-nowrap transition" id="tabMemory">Memory & Storage</button>
+            <button onclick="openTab('quiz')" class="tab-btn bg-white text-gray-600 px-5 py-2.5 rounded-lg shadow hover:bg-gray-50 font-medium whitespace-nowrap transition" id="tabQuiz">Knowledge Check</button>
+        </div>
+
+        <!-- Hardware Tab -->
+        <div id="hardware" class="tab-content active">
+            <div class="card border-t-4 border-blue-500">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800" id="hwTitle">Hardware Components & Bus System</h2>
+                <p class="mb-6 text-gray-600 leading-relaxed text-lg" id="hwDesc">A computer system is a team of hardware components. They must communicate seamlessly to process data into useful information. Think of it like a restaurant: the waiters take orders (Input), the kitchen cooks (Processing), and the food is served (Output).</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 hover:shadow-md transition">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-blue-800"><i class="fas fa-keyboard mr-3 text-blue-500 text-2xl"></i> <span id="inputOutput">Input & Output Devices</span></h3>
+                        <p class="text-base mb-4 text-gray-700" id="ioDesc">These devices are our bridge to the computer. We use them to collect data from the real world and display the processed results back to us. Choosing the right device depends on the type of data (text, audio, image, video).</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-blue-700 border-b border-blue-200 pb-1 mb-2" id="inputLabel">📥 Input (Collecting Data):</h4>
+                                <ul class="list-disc pl-5 text-sm space-y-1 text-gray-700" id="ioListIn">
+                                    <li><strong>Keyboard:</strong> For text and commands.</li>
+                                    <li><strong>Microphone:</strong> For audio input.</li>
+                                    <li><strong>Scanner / Digital Camera:</strong> For capturing images.</li>
+                                    <li><strong>Webcam:</strong> For capturing live video.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-blue-700 border-b border-blue-200 pb-1 mb-2" id="outputLabel">📤 Output (Displaying Information):</h4>
+                                <ul class="list-disc pl-5 text-sm space-y-1 text-gray-700" id="ioListOut">
+                                    <li><strong>Monitor / Screen:</strong> For visual and video output.</li>
+                                    <li><strong>Printer:</strong> For hard copy text and images.</li>
+                                    <li><strong>Speaker:</strong> For audio output.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-xl border border-purple-100 hover:shadow-md transition">
+                        <h3 class="text-xl font-bold mb-4 flex items-center text-purple-800"><i class="fas fa-microchip mr-3 text-purple-500 text-2xl"></i> <span id="processingUnits">Processing Units</span></h3>
+                        <p class="text-base mb-4 text-gray-700" id="puDesc">These are the "brains" of the operation. They take the input data, perform calculations or logic operations, and generate the output.</p>
+                        <ul class="space-y-4 text-sm text-gray-700" id="puList">
+                            <li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                                <strong class="text-purple-700 text-base block mb-1">CPU (Central Processing Unit):</strong> 
+                                The "Head Chef". It handles general tasks, manages all other components, and ensures the whole system runs smoothly. Every computer needs a CPU.
+                            </li>
+                            <li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                                <strong class="text-purple-700 text-base block mb-1">GPU (Graphics Processing Unit):</strong> 
+                                The "Specialist Chef". Designed specifically to handle complex mathematical calculations required for rendering high-quality images, 3D graphics, and video very quickly.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-bold mb-3 flex items-center text-gray-800"><i class="fas fa-network-wired mr-3 text-gray-500"></i> <span id="busTitle">The Bus System: The Internal Highway</span></h3>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4" id="busDesc">Hardware components are useless if they can't talk to each other. The <strong>Bus System</strong> is a set of physical wires that acts as an internal highway, transferring data between the CPU, memory, and I/O devices.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="bg-white p-3 rounded border border-gray-200 text-center">
+                            <i class="fas fa-database text-blue-500 text-xl mb-2"></i>
+                            <strong class="block text-gray-800 mb-1" id="dataBus">Data Bus</strong>
+                            <span class="text-gray-600" id="dataBusDesc">Carries the actual data being processed.</span>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-gray-200 text-center">
+                            <i class="fas fa-map-marker-alt text-red-500 text-xl mb-2"></i>
+                            <strong class="block text-gray-800 mb-1" id="addressBus">Address Bus</strong>
+                            <span class="text-gray-600" id="addressBusDesc">Carries the specific memory location where data needs to go or come from.</span>
+                        </div>
+                        <div class="bg-white p-3 rounded border border-gray-200 text-center">
+                            <i class="fas fa-cogs text-green-500 text-xl mb-2"></i>
+                            <strong class="block text-gray-800 mb-1" id="controlBus">Control Bus</strong>
+                            <span class="text-gray-600" id="controlBusDesc">Carries commands (like 'read' or 'write') from the CPU to coordinate everything.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Guide Box -->
+                <div class="guide-box">
+                    <h4 class="font-bold text-yellow-800 flex items-center gap-2 mb-2 text-lg"><i class="fas fa-question-circle text-xl"></i> <span id="guide1Title">Think About It: How does the computer know what to do?</span></h4>
+                    <p class="text-base text-yellow-900 leading-relaxed" id="guide1Desc">When you click a mouse or type on a keyboard, the data travels via the Bus System to the CPU. But the CPU is just electronic circuits; it needs a step-by-step process to understand and act on your input. Let's move to the next tab to learn about the "Machine Cycle" to see how the CPU actually thinks!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CPU Tab -->
+        <div id="cpu" class="tab-content">
+            <div class="card border-t-4 border-purple-500">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800" id="cpuTitle">CPU & The Machine Cycle</h2>
+                
+                <div class="mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <h3 class="text-xl font-bold mb-3 text-gray-800 flex items-center"><i class="fas fa-tachometer-alt mr-2 text-gray-600"></i> <span id="cpuMeasurement">Measuring CPU Speed</span></h3>
+                    <p class="text-base text-gray-700 leading-relaxed mb-4" id="cpuSpeedDesc">CPU speed is measured in <strong>frequency</strong> (e.g., Gigahertz - GHz), which represents how many billions of cycles it can perform per second. Because CPUs operate at such mind-boggling speeds, we must use microscopic units of time to measure a single operation:</p>
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <div class="math-unit shadow-sm"><span id="unitMicro">Microsecond: 10<sup>-6</sup>s</span></div>
+                        <div class="math-unit shadow-sm"><span id="unitNano">Nanosecond: 10<sup>-9</sup>s</span></div>
+                        <div class="math-unit shadow-sm"><span id="unitPico">Picosecond: 10<sup>-12</sup>s</span></div>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold mb-8 text-center text-gray-800" id="cycleTitle">The Fetch-Decode-Execute Cycle</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-6 text-center mb-8">
+                    <div class="cycle-step bg-blue-50 p-6 rounded-full w-48 h-48 flex flex-col justify-center items-center border-4 border-blue-200 relative shadow-md">
+                        <span class="absolute -top-4 bg-blue-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow">Step 1</span>
+                        <i class="fas fa-download text-4xl text-blue-500 mb-3"></i>
+                        <span class="font-bold text-blue-800 text-lg" id="stepFetch">Fetch</span>
+                        <span class="text-xs text-blue-600 mt-1" id="stepFetchSub">Get instruction</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-3xl text-gray-300 hidden md:block"></i>
+                    <i class="fas fa-arrow-down text-3xl text-gray-300 md:hidden"></i>
+                    <div class="cycle-step bg-yellow-50 p-6 rounded-full w-48 h-48 flex flex-col justify-center items-center border-4 border-yellow-200 relative shadow-md">
+                        <span class="absolute -top-4 bg-yellow-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow">Step 2</span>
+                        <i class="fas fa-search text-4xl text-yellow-500 mb-3"></i>
+                        <span class="font-bold text-yellow-800 text-lg" id="stepDecode">Decode</span>
+                        <span class="text-xs text-yellow-600 mt-1" id="stepDecodeSub">Understand it</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-3xl text-gray-300 hidden md:block"></i>
+                    <i class="fas fa-arrow-down text-3xl text-gray-300 md:hidden"></i>
+                    <div class="cycle-step bg-green-50 p-6 rounded-full w-48 h-48 flex flex-col justify-center items-center border-4 border-green-200 relative shadow-md">
+                        <span class="absolute -top-4 bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow">Step 3</span>
+                        <i class="fas fa-play text-4xl text-green-500 mb-3"></i>
+                        <span class="font-bold text-green-800 text-lg" id="stepExecute">Execute</span>
+                        <span class="text-xs text-green-600 mt-1" id="stepExecuteSub">Do the action</span>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm text-base text-gray-700 space-y-4">
+                    <p id="cycleDesc">To perform this cycle continuously, the CPU relies on <strong>Buses</strong> (to transport data) and internal <strong>Registers</strong> (tiny, super-fast temporary memory areas built directly inside the CPU to hold data being processed right now). Here is what happens in detail:</p>
+                    <ul class="space-y-3" id="cycleList">
+                        <li class="flex items-start"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">1</span> <div><strong>Fetch:</strong> The CPU retrieves the next instruction from Main Memory (RAM) via the bus and stores it in a register.</div></li>
+                        <li class="flex items-start"><span class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">2</span> <div><strong>Decode:</strong> The Control Unit (CU) translates the instruction into electronic signals the computer understands.</div></li>
+                        <li class="flex items-start"><span class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">3</span> <div><strong>Execute:</strong> The Arithmetic Logic Unit (ALU) performs the requested action (e.g., math calculation, moving data), and results are saved back to a register or memory.</div></li>
+                    </ul>
+                </div>
+
+                <!-- Teacher Guide Box -->
+                <div class="guide-box">
+                    <h4 class="font-bold text-yellow-800 flex items-center gap-2 mb-2 text-lg"><i class="fas fa-lightbulb text-xl"></i> <span id="guide2Title">Analogy Time!</span></h4>
+                    <p class="text-base text-yellow-900 leading-relaxed" id="guide2Desc">Imagine the CPU is a chef in a kitchen. <br><strong>Fetch:</strong> Reading the next step on the recipe card. <br><strong>Decode:</strong> Understanding what ingredients and tools are needed. <br><strong>Execute:</strong> Actually chopping the vegetables or stirring the pot. <br><br><em>Question:</em> But where does the chef keep the recipe book and all the ingredients? Let's explore Memory and Storage to find out!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Tab -->
+        <div id="memory" class="tab-content">
+            <div class="card border-t-4 border-green-500">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800" id="memTitle">Memory & Storage</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-green-50 p-6 rounded-xl border border-green-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-2 text-green-800 flex items-center gap-2"><i class="fas fa-memory"></i> <span id="primaryMem">Primary Memory (Main Memory)</span></h3>
+                        <p class="text-sm mb-4 text-gray-600 italic border-b border-green-200 pb-2" id="primaryAnalogy">Analogy: The Chef's Kitchen Counter (Fast access, but limited space). Holds what is being worked on right now.</p>
+                        <ul class="space-y-4 text-sm text-gray-700" id="primaryList">
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">RAM (Random Access Memory):</span> 
+                                <strong>Volatile</strong> (loses all data when powered off). Holds data and programs <em>currently in use</em>. The CPU accesses it directly and quickly.
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">ROM (Read Only Memory):</span> 
+                                <strong>Non-volatile</strong> (keeps data without power). Holds essential, unchanging boot instructions (like the BIOS) needed to start the computer.
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">Cache Memory:</span> 
+                                Extremely fast, small capacity memory built right next to or inside the CPU. It stores frequently used data to speed up processing, acting like a bridge between the super-fast CPU and the slower RAM.
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-2 text-orange-800 flex items-center gap-2"><i class="fas fa-hdd"></i> <span id="secondaryStorage">Secondary Storage</span></h3>
+                        <p class="text-sm mb-4 text-gray-600 italic border-b border-orange-200 pb-2" id="storageAnalogy">Analogy: The Chef's Fridge/Pantry (Slower access, but huge capacity). Keeps food safely forever until needed.</p>
+                        <ul class="space-y-3 text-sm text-gray-700" id="storageList">
+                            <li class="flex items-center gap-2"><i class="fas fa-database text-orange-400 w-5"></i> <div><strong>Magnetic Disk:</strong> Hard Drives (HDD). Uses moving parts. Good for cheap, large storage.</div></li>
+                            <li class="flex items-center gap-2"><i class="fas fa-compact-disc text-orange-400 w-5"></i> <div><strong>Optical Disk:</strong> CD/DVD. Uses lasers to read/write data.</div></li>
+                            <li class="flex items-center gap-2"><i class="fas fa-usb text-orange-400 w-5"></i> <div><strong>Flash Memory:</strong> SSDs, USB drives. Very fast, no moving parts, highly durable. Becoming the modern standard.</div></li>
+                            <li class="flex items-center gap-2"><i class="fas fa-tape text-orange-400 w-5"></i> <div><strong>Magnetic Tape:</strong> Strictly <em>sequential access</em> (must read from start to finish, like a cassette). Slow, but used for cheap, massive data backups.</div></li>
+                            <li class="flex items-center gap-2"><i class="fas fa-cloud text-orange-400 w-5"></i> <div><strong>Network Storage:</strong> Cloud storage accessed via the internet (e.g., Google Drive).</div></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-4 text-indigo-800 flex items-center gap-2"><i class="fas fa-rocket"></i> <span id="perfTitle">What affects Computer Performance?</span></h3>
+                        <ul class="space-y-3 text-sm text-gray-700" id="perfList">
+                            <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Memory Size (RAM):</strong> More RAM means a larger "kitchen counter". More applications can run simultaneously without the computer slowing down to swap data to the hard drive.</div></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Word Length:</strong> The number of bits the CPU can process in one go (e.g., 32-bit vs 64-bit). A larger word length means processing more data per cycle, resulting in higher performance.</div></li>
+                            <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Memory Address Bus Width:</strong> Every piece of data has a unique location. A wider address bus allows the CPU to access a larger maximum amount of memory locations.</div></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-2 text-blue-800 flex items-center gap-2"><i class="fas fa-balance-scale"></i> <span id="unitsTitle">Data Units (SI vs Computer)</span></h3>
+                        <p class="text-sm mb-4 text-gray-700" id="unitsDesc">Humans count in Base-10 (SI system), but computers count in binary (Base-2). This causes a crucial difference in how prefixes are calculated!</p>
+                        <div class="overflow-x-auto rounded-lg border border-blue-200 shadow-sm">
+                            <table class="w-full text-sm text-left bg-white">
+                                <thead class="bg-blue-100 text-blue-900">
+                                    <tr><th class="p-3">Unit</th><th class="p-3">SI (Base 10)</th><th class="p-3">Computer (Base 2)</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-3 font-medium">Kilobyte (KB)</td>
+                                        <td class="p-3">1000 Bytes</td>
+                                        <td class="p-3 font-bold text-blue-600">1024 Bytes (2<sup>10</sup>)</td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-3 font-medium">Megabyte (MB)</td>
+                                        <td class="p-3">1000 KB</td>
+                                        <td class="p-3 font-bold text-blue-600">1024 KB (2<sup>20</sup>)</td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-3 font-medium">Gigabyte (GB)</td>
+                                        <td class="p-3">1000 MB</td>
+                                        <td class="p-3 font-bold text-blue-600">1024 MB (2<sup>30</sup>)</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="p-3 font-medium">Terabyte (TB)</td>
+                                        <td class="p-3">1000 GB</td>
+                                        <td class="p-3 font-bold text-blue-600">1024 GB (2<sup>40</sup>)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teacher Guide Box -->
+                <div class="guide-box">
+                    <h4 class="font-bold text-yellow-800 flex items-center gap-2 mb-2 text-lg"><i class="fas fa-chart-line text-xl"></i> <span id="guide3Title">Latest Developments & Trends</span></h4>
+                    <p class="text-base text-yellow-900 leading-relaxed" id="guide3Desc">Technology evolves rapidly. The clear historical trend for computer components is: <strong>Physical size gets smaller, while storage capacity and processing speed grow massively.</strong> We moved from floppy disks holding 1.44MB to tiny MicroSD cards holding 1TB, and from single-core processors to multi-core CPUs that can execute multiple cycles simultaneously. <br><br>Now that you understand the basics, are you ready to test your knowledge?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz" class="tab-content">
+            <div class="card border-t-4 border-red-500">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800" id="quizTitle">Knowledge Check</h2>
+                    <p class="text-gray-600 text-lg" id="quizSubtitle">Test your understanding! Select an answer for each question. Detailed explanations will help you learn from any mistakes.</p>
+                </div>
+                
+                <div id="quizContainer" class="space-y-8">
+                    <!-- Quiz questions injected by JS -->
+                </div>
+                
+                <div class="mt-10 flex flex-col items-center gap-6 border-t pt-8">
+                    <button onclick="checkAnswers()" class="bg-blue-600 text-white px-10 py-4 rounded-xl hover:bg-blue-700 transition font-bold shadow-lg text-lg w-full md:w-auto transform hover:-translate-y-1" id="submitQuiz">Submit Answers</button>
+                    
+                    <div id="quizResult" class="font-bold text-xl hidden px-8 py-6 rounded-xl w-full text-center shadow-inner"></div>
+                    
+                    <button onclick="renderQuiz()" class="bg-gray-200 text-gray-800 px-10 py-4 rounded-xl hover:bg-gray-300 transition font-bold shadow text-lg w-full md:w-auto hidden" id="retryQuiz"><i class="fas fa-redo mr-2"></i> Retry Quiz</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // State
+        let currentLang = 'en';
+
+        // Content Dictionary
+        const content = {
+            en: {
+                title: "Basic Machine Organisation",
+                langBtn: "中文",
+                tabHardware: "Hardware & I/O",
+                tabCpu: "CPU & Cycle",
+                tabMemory: "Memory & Storage",
+                tabQuiz: "Knowledge Check",
+                
+                // Hardware Tab
+                hwTitle: "Hardware Components & Bus System",
+                hwDesc: "A computer system is a team of hardware components. They must communicate seamlessly to process data into useful information. Think of it like a restaurant: the waiters take orders (Input), the kitchen cooks (Processing), and the food is served (Output).",
+                inputOutput: "Input & Output Devices",
+                ioDesc: "These devices are our bridge to the computer. We use them to collect data from the real world and display the processed results back to us. Choosing the right device depends on the type of data (text, audio, image, video).",
+                inputLabel: "📥 Input (Collecting Data):",
+                ioListIn: `<li><strong>Keyboard:</strong> For text and commands.</li>
+                           <li><strong>Microphone:</strong> For audio input.</li>
+                           <li><strong>Scanner / Digital Camera:</strong> For capturing images.</li>
+                           <li><strong>Webcam:</strong> For capturing live video.</li>`,
+                outputLabel: "📤 Output (Displaying Information):",
+                ioListOut: `<li><strong>Monitor / Screen:</strong> For visual and video output.</li>
+                            <li><strong>Printer:</strong> For hard copy text and images.</li>
+                            <li><strong>Speaker:</strong> For audio output.</li>`,
+                processingUnits: "Processing Units",
+                puDesc: "These are the 'brains' of the operation. They take the input data, perform calculations or logic operations, and generate the output.",
+                puList: `<li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                            <strong class="text-purple-700 text-base block mb-1">CPU (Central Processing Unit):</strong> 
+                            The "Head Chef". It handles general tasks, manages all other components, and ensures the whole system runs smoothly. Every computer needs a CPU.
+                        </li>
+                        <li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                            <strong class="text-purple-700 text-base block mb-1">GPU (Graphics Processing Unit):</strong> 
+                            The "Specialist Chef". Designed specifically to handle complex mathematical calculations required for rendering high-quality images, 3D graphics, and video very quickly.
+                        </li>`,
+                busTitle: "The Bus System: The Internal Highway",
+                busDesc: "Hardware components are useless if they can't talk to each other. The <strong>Bus System</strong> is a set of physical wires that acts as an internal highway, transferring data between the CPU, memory, and I/O devices.",
+                dataBus: "Data Bus",
+                dataBusDesc: "Carries the actual data being processed.",
+                addressBus: "Address Bus",
+                addressBusDesc: "Carries the specific memory location where data needs to go or come from.",
+                controlBus: "Control Bus",
+                controlBusDesc: "Carries commands (like 'read' or 'write') from the CPU to coordinate everything.",
+                guide1Title: "Think About It: How does the computer know what to do?",
+                guide1Desc: "When you click a mouse or type on a keyboard, the data travels via the Bus System to the CPU. But the CPU is just electronic circuits; it needs a step-by-step process to understand and act on your input. Let's move to the next tab to learn about the 'Machine Cycle' to see how the CPU actually thinks!",
+
+                // CPU Tab
+                cpuTitle: "CPU & The Machine Cycle",
+                cpuMeasurement: "Measuring CPU Speed",
+                cpuSpeedDesc: "CPU speed is measured in <strong>frequency</strong> (e.g., Gigahertz - GHz), which represents how many billions of cycles it can perform per second. Because CPUs operate at such mind-boggling speeds, we must use microscopic units of time to measure a single operation:",
+                unitMicro: "Microsecond: 10<sup>-6</sup>s",
+                unitNano: "Nanosecond: 10<sup>-9</sup>s",
+                unitPico: "Picosecond: 10<sup>-12</sup>s",
+                cycleTitle: "The Fetch-Decode-Execute Cycle",
+                stepFetch: "Fetch",
+                stepFetchSub: "Get instruction",
+                stepDecode: "Decode",
+                stepDecodeSub: "Understand it",
+                stepExecute: "Execute",
+                stepExecuteSub: "Do the action",
+                cycleDesc: "To perform this cycle continuously, the CPU relies on <strong>Buses</strong> (to transport data) and internal <strong>Registers</strong> (tiny, super-fast temporary memory areas built directly inside the CPU to hold data being processed right now). Here is what happens in detail:",
+                cycleList: `<li class="flex items-start"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">1</span> <div><strong>Fetch:</strong> The CPU retrieves the next instruction from Main Memory (RAM) via the bus and stores it in a register.</div></li>
+                            <li class="flex items-start"><span class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">2</span> <div><strong>Decode:</strong> The Control Unit (CU) translates the instruction into electronic signals the computer understands.</div></li>
+                            <li class="flex items-start"><span class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">3</span> <div><strong>Execute:</strong> The Arithmetic Logic Unit (ALU) performs the requested action (e.g., math calculation, moving data), and results are saved back to a register or memory.</div></li>`,
+                guide2Title: "Analogy Time!",
+                guide2Desc: "Imagine the CPU is a chef in a kitchen. <br><strong>Fetch:</strong> Reading the next step on the recipe card. <br><strong>Decode:</strong> Understanding what ingredients and tools are needed. <br><strong>Execute:</strong> Actually chopping the vegetables or stirring the pot. <br><br><em>Question:</em> But where does the chef keep the recipe book and all the ingredients? Let's explore Memory and Storage to find out!",
+
+                // Memory Tab
+                memTitle: "Memory & Storage",
+                primaryMem: "Primary Memory (Main Memory)",
+                primaryAnalogy: "Analogy: The Chef's Kitchen Counter (Fast access, but limited space). Holds what is being worked on right now.",
+                primaryList: `<li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">RAM (Random Access Memory):</span> 
+                                <strong>Volatile</strong> (loses all data when powered off). Holds data and programs <em>currently in use</em>. The CPU accesses it directly and quickly.
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">ROM (Read Only Memory):</span> 
+                                <strong>Non-volatile</strong> (keeps data without power). Holds essential, unchanging boot instructions (like the BIOS) needed to start the computer.
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">Cache Memory:</span> 
+                                Extremely fast, small capacity memory built right next to or inside the CPU. It stores frequently used data to speed up processing, acting like a bridge between the super-fast CPU and the slower RAM.
+                            </li>`,
+                secondaryStorage: "Secondary Storage",
+                storageAnalogy: "Analogy: The Chef's Fridge/Pantry (Slower access, but huge capacity). Keeps food safely forever until needed.",
+                storageList: `<li class="flex items-center gap-2"><i class="fas fa-database text-orange-400 w-5"></i> <div><strong>Magnetic Disk:</strong> Hard Drives (HDD). Uses moving parts. Good for cheap, large storage.</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-compact-disc text-orange-400 w-5"></i> <div><strong>Optical Disk:</strong> CD/DVD. Uses lasers to read/write data.</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-usb text-orange-400 w-5"></i> <div><strong>Flash Memory:</strong> SSDs, USB drives. Very fast, no moving parts, highly durable. Becoming the modern standard.</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-tape text-orange-400 w-5"></i> <div><strong>Magnetic Tape:</strong> Strictly <em>sequential access</em> (must read from start to finish, like a cassette). Slow, but used for cheap, massive data backups.</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-cloud text-orange-400 w-5"></i> <div><strong>Network Storage:</strong> Cloud storage accessed via the internet (e.g., Google Drive).</div></li>`,
+                perfTitle: "What affects Computer Performance?",
+                perfList: `<li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Memory Size (RAM):</strong> More RAM means a larger "kitchen counter". More applications can run simultaneously without the computer slowing down to swap data to the hard drive.</div></li>
+                           <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Word Length:</strong> The number of bits the CPU can process in one go (e.g., 32-bit vs 64-bit). A larger word length means processing more data per cycle, resulting in higher performance.</div></li>
+                           <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>Memory Address Bus Width:</strong> Every piece of data has a unique location. A wider address bus allows the CPU to access a larger maximum amount of memory locations.</div></li>`,
+                unitsTitle: "Data Units (SI vs Computer)",
+                unitsDesc: "Humans count in Base-10 (SI system), but computers count in binary (Base-2). This causes a crucial difference in how prefixes are calculated!",
+                guide3Title: "Latest Developments & Trends",
+                guide3Desc: "Technology evolves rapidly. The clear historical trend for computer components is: <strong>Physical size gets smaller, while storage capacity and processing speed grow massively.</strong> We moved from floppy disks holding 1.44MB to tiny MicroSD cards holding 1TB, and from single-core processors to multi-core CPUs that can execute multiple cycles simultaneously. <br><br>Now that you understand the basics, are you ready to test your knowledge?",
+
+                // Quiz Tab
+                quizTitle: "Knowledge Check",
+                quizSubtitle: "Test your understanding! Select an answer for each question. Detailed explanations will help you learn from any mistakes.",
+                submitQuiz: "Submit Answers",
+                retryQuiz: "Retry Quiz",
+                questions: [
+                    { 
+                        q: "You are working on a document, and suddenly the power goes out. When you restart the computer, your unsaved work is gone. Which memory component was holding your unsaved work?", 
+                        options: ["ROM (Read Only Memory)", "RAM (Random Access Memory)", "Hard Disk Drive (HDD)", "Flash Drive"], 
+                        ans: 1,
+                        explanation: "Correct! RAM is volatile memory used for temporary storage while the computer is running. It loses all data when power is lost. ROM, HDDs, and Flash Drives are non-volatile and keep data even without power."
+                    },
+                    { 
+                        q: "During the Machine Cycle, what is the specific role of the 'Decode' step?", 
+                        options: ["To retrieve the instruction from RAM.", "To perform mathematical calculations.", "To translate the instruction into electronic signals the CPU understands.", "To save the final result to the hard drive."], 
+                        ans: 2,
+                        explanation: "The Control Unit (CU) handles the Decode step, translating the fetched instruction into signals that tell the Arithmetic Logic Unit (ALU) and other components what to Execute."
+                    },
+                    { 
+                        q: "A student buys a '1 Kilobyte' file. In computer terminology (Base-2), how many Bytes is this exactly?", 
+                        options: ["1000 Bytes", "1024 Bytes", "1000 Bits", "1024 Bits"], 
+                        ans: 1,
+                        explanation: "Because computers operate using binary (Base-2), prefixes scale by powers of 2. 2<sup>10</sup> = 1024. Therefore, 1 KB = 1024 Bytes. The SI metric system uses Base-10, where 'kilo' means exactly 1000."
+                    },
+                    { 
+                        q: "A large company needs to backup massive amounts of data cheaply. They don't need to access files randomly; they just need to store them safely. Which storage device is best suited and uses strictly sequential access?", 
+                        options: ["Solid State Drive (SSD)", "Magnetic Tape", "Optical Disk (DVD)", "Cache Memory"], 
+                        ans: 1,
+                        explanation: "Magnetic Tape requires the reader to spool through the tape sequentially to find data (like an old cassette tape). It's very slow for random access but extremely cheap and durable for massive, long-term backups."
+                    }
+                ]
+            },
+            zh: {
+                title: "基本機器組織",
+                langBtn: "English",
+                tabHardware: "硬件與輸入/輸出",
+                tabCpu: "CPU與週期",
+                tabMemory: "記憶體與儲存",
+                tabQuiz: "知識測試",
+                
+                // Hardware Tab
+                hwTitle: "硬件組件與總線系統",
+                hwDesc: "電腦系統是由多個硬件組件組成的團隊。它們必須無縫溝通，才能將數據處理成有用的資訊。想像一下餐廳：侍應生負責點餐（輸入），廚房負責烹飪（處理），最後上菜（輸出）。",
+                inputOutput: "輸入和輸出設備",
+                ioDesc: "這些設備是我們與電腦之間的橋樑。我們使用它們從現實世界收集數據，並將處理後的結果顯示給我們。選擇合適的設備取決於數據的類型（文本、音頻、圖像、視頻）。",
+                inputLabel: "📥 輸入（收集數據）：",
+                ioListIn: `<li><strong>鍵盤：</strong> 用於輸入文本和命令。</li>
+                           <li><strong>麥克風：</strong> 用於音頻輸入。</li>
+                           <li><strong>掃描儀 / 數碼相機：</strong> 用於擷取圖像。</li>
+                           <li><strong>網絡攝像頭：</strong> 用於擷取實時視頻。</li>`,
+                outputLabel: "📤 輸出（顯示資訊）：",
+                ioListOut: `<li><strong>顯示器 / 螢幕：</strong> 用於視覺和視頻輸出。</li>
+                            <li><strong>打印機：</strong> 用於輸出實體文本和圖像（硬拷貝）。</li>
+                            <li><strong>揚聲器：</strong> 用於音頻輸出。</li>`,
+                processingUnits: "處理單元",
+                puDesc: "這些是運作的「大腦」。它們接收輸入數據，執行計算或邏輯操作，並產生輸出。",
+                puList: `<li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                            <strong class="text-purple-700 text-base block mb-1">CPU（中央處理器）：</strong> 
+                            「主廚」。它處理一般任務，管理所有其他組件，並確保整個系統順利運行。每台電腦都需要一個CPU。
+                        </li>
+                        <li class="bg-white p-3 rounded shadow-sm border border-purple-100">
+                            <strong class="text-purple-700 text-base block mb-1">GPU（圖形處理器）：</strong> 
+                            「專科廚師」。專門設計用於極快地處理渲染高質量圖像、3D圖形和視頻所需的複雜數學計算。
+                        </li>`,
+                busTitle: "總線系統：內部高速公路",
+                busDesc: "如果硬件組件無法互相溝通，它們就毫無用處。<strong>總線系統</strong>是一組實體線路，充當內部高速公路，在CPU、記憶體和I/O設備之間傳輸數據。",
+                dataBus: "數據總線 (Data Bus)",
+                dataBusDesc: "傳輸正在處理的實際數據。",
+                addressBus: "地址總線 (Address Bus)",
+                addressBusDesc: "傳輸數據需要前往或來自的特定記憶體位置。",
+                controlBus: "控制總線 (Control Bus)",
+                controlBusDesc: "傳輸來自CPU的命令（如「讀取」或「寫入」）以協調一切。",
+                guide1Title: "想一想：電腦如何知道該做什麼？",
+                guide1Desc: "當你點擊滑鼠或在鍵盤上打字時，數據透過總線系統傳送到CPU。但是CPU只是電子電路；它需要一個循序漸進的過程來理解並根據你的輸入採取行動。讓我們進入下一個分頁學習「機器週期」，看看CPU實際上是如何思考的！",
+
+                // CPU Tab
+                cpuTitle: "CPU與機器週期",
+                cpuMeasurement: "測量CPU速度",
+                cpuSpeedDesc: "CPU速度以<strong>頻率</strong>測量（例如千兆赫茲 - GHz），代表它每秒能執行多少十億次週期。因為CPU的運作速度快得令人難以置信，我們必須使用微觀的時間單位來測量單次操作：",
+                unitMicro: "微秒 (Microsecond): 10<sup>-6</sup>s",
+                unitNano: "奈秒 (Nanosecond): 10<sup>-9</sup>s",
+                unitPico: "皮秒 (Picosecond): 10<sup>-12</sup>s",
+                cycleTitle: "提取-解碼-執行週期",
+                stepFetch: "提取 (Fetch)",
+                stepFetchSub: "獲取指令",
+                stepDecode: "解碼 (Decode)",
+                stepDecodeSub: "理解指令",
+                stepExecute: "執行 (Execute)",
+                stepExecuteSub: "執行動作",
+                cycleDesc: "為了持續執行這個週期，CPU依賴<strong>總線</strong>（傳輸數據）和內部的<strong>寄存器 (Registers)</strong>（直接建在CPU內部、微小且超快的暫存區，用於保存目前正在處理的數據）。詳細過程如下：",
+                cycleList: `<li class="flex items-start"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">1</span> <div><strong>提取：</strong> CPU透過總線從主記憶體（RAM）獲取下一條指令並存入寄存器。</div></li>
+                            <li class="flex items-start"><span class="bg-yellow-100 text-yellow-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">2</span> <div><strong>解碼：</strong> 控制單元 (CU) 將指令翻譯成電腦能理解的電子信號。</div></li>
+                            <li class="flex items-start"><span class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-xs mr-3 mt-1">3</span> <div><strong>執行：</strong> 算術邏輯單元 (ALU) 執行要求的動作（例如數學計算、移動數據），並將結果保存回寄存器或記憶體。</div></li>`,
+                guide2Title: "比喻時間！",
+                guide2Desc: "想像CPU是廚房裡的一位廚師。<br><strong>提取：</strong> 閱讀食譜卡上的下一個步驟。<br><strong>解碼：</strong> 理解需要什麼食材和工具。<br><strong>執行：</strong> 實際切菜或攪拌鍋子。<br><br><em>問題：</em> 但是廚師把食譜和所有食材放在哪裡呢？讓我們來探索記憶體和儲存裝置尋找答案！",
+
+                // Memory Tab
+                memTitle: "記憶體與儲存",
+                primaryMem: "主記憶體 (Primary Memory)",
+                primaryAnalogy: "比喻：廚師的廚房流理台（存取速度快，但空間有限）。保存目前正在處理的東西。",
+                primaryList: `<li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">RAM (隨機存取記憶體)：</span> 
+                                <strong>易失性</strong>（斷電時流失所有數據）。保存<em>目前使用中</em>的數據和程式。CPU可直接且快速地存取它。
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">ROM (唯讀記憶體)：</span> 
+                                <strong>非易失性</strong>（無電源也能保存數據）。保存啟動電腦所需的基本、不可更改的開機指令（如BIOS）。
+                            </li>
+                            <li class="bg-white p-3 rounded border border-green-100">
+                                <span class="font-bold text-green-700 text-base block mb-1">快取記憶體 (Cache)：</span> 
+                                建在CPU旁邊或內部、容量小但極快的記憶體。它儲存常用的數據以加速處理，充當超快CPU和較慢RAM之間的橋樑。
+                            </li>`,
+                secondaryStorage: "輔助儲存 (Secondary Storage)",
+                storageAnalogy: "比喻：廚師的冰箱/儲藏室（存取較慢，但容量巨大）。安全地永久保存食物直到需要時。",
+                storageList: `<li class="flex items-center gap-2"><i class="fas fa-database text-orange-400 w-5"></i> <div><strong>磁性磁碟：</strong> 硬碟 (HDD)。使用活動部件。適合便宜、大容量的儲存。</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-compact-disc text-orange-400 w-5"></i> <div><strong>光碟：</strong> CD/DVD。使用雷射讀寫數據。</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-usb text-orange-400 w-5"></i> <div><strong>快閃記憶體：</strong> SSD、USB隨身碟。速度極快，無活動部件，耐用度高。正成為現代標準。</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-tape text-orange-400 w-5"></i> <div><strong>磁帶：</strong> 嚴格的<em>順序存取</em>（必須從頭讀到尾，像卡式錄音帶）。速度慢，但用於便宜、大量的數據備份。</div></li>
+                              <li class="flex items-center gap-2"><i class="fas fa-cloud text-orange-400 w-5"></i> <div><strong>網絡儲存：</strong> 透過互聯網存取的雲端儲存（如 Google Drive）。</div></li>`,
+                perfTitle: "什麼影響電腦效能？",
+                perfList: `<li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>記憶體大小 (RAM)：</strong> RAM越大意味著「流理台」越大。可同時運行的應用程式越多，電腦就不會因為要將數據交換到硬碟而變慢。</div></li>
+                           <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>字長 (Word Length)：</strong> CPU一次能處理的位元數（如32位元 vs 64位元）。字長越大意味著每個週期處理更多數據，從而提高效能。</div></li>
+                           <li class="flex items-start gap-2"><i class="fas fa-check-circle text-indigo-500 mt-1"></i> <div><strong>記憶體地址總線寬度：</strong> 每筆數據都有一個獨特的位置。更寬的地址總線允許CPU存取更多數量的記憶體位置。</div></li>`,
+                unitsTitle: "數據單位（SI與電腦）",
+                unitsDesc: "人類使用十進制（SI制）計數，但電腦使用二進制（以2為底）計數。這導致了前綴計算方式的關鍵差異！",
+                guide3Title: "最新發展與趨勢",
+                guide3Desc: "科技發展迅速。電腦組件明顯的歷史趨勢是：<strong>物理體積越來越小，但儲存容量和處理速度卻大幅增長。</strong> 我們從容量1.44MB的軟碟發展到容量1TB的微型MicroSD卡，從單核處理器發展到能同時執行多個週期的多核CPU。<br><br>現在你了解了基礎知識，準備好測試你的知識了嗎？",
+
+                // Quiz Tab
+                quizTitle: "知識測試",
+                quizSubtitle: "測試你的理解！請為每條問題選擇一個答案。詳細的解釋將幫助你從錯誤中學習。",
+                submitQuiz: "提交答案",
+                retryQuiz: "重試測試",
+                questions: [
+                    { 
+                        q: "你正在處理一份文件，突然停電了。當你重新啟動電腦時，未保存的工作消失了。哪個記憶體組件當時正在保存你未保存的工作？", 
+                        options: ["ROM (唯讀記憶體)", "RAM (隨機存取記憶體)", "硬碟 (HDD)", "快閃記憶體 (USB)"], 
+                        ans: 1,
+                        explanation: "正確！RAM是易失性記憶體，用於電腦運行時的臨時儲存。斷電時它會流失所有數據。ROM、硬碟和快閃記憶體都是非易失性的，即使沒有電源也能保存數據。"
+                    },
+                    { 
+                        q: "在機器週期中，「解碼 (Decode)」步驟的具體作用是什麼？", 
+                        options: ["從RAM中提取指令。", "執行數學計算。", "將指令翻譯成CPU能理解的電子信號。", "將最終結果保存到硬碟。"], 
+                        ans: 2,
+                        explanation: "控制單元 (CU) 負責解碼步驟，將提取的指令翻譯成信號，告訴算術邏輯單元 (ALU) 和其他組件要執行 (Execute) 什麼。"
+                    },
+                    { 
+                        q: "一個學生買了一個「1 Kilobyte」的檔案。在電腦術語中（二進制），這準確來說是多少 Bytes？", 
+                        options: ["1000 Bytes", "1024 Bytes", "1000 Bits", "1024 Bits"], 
+                        ans: 1,
+                        explanation: "因為電腦使用二進制（以2為底）運作，前綴按2的次方縮放。2<sup>10</sup> = 1024。因此，1 KB = 1024 Bytes。SI公制系統使用十進制，其中'kilo'代表精確的1000。"
+                    },
+                    { 
+                        q: "一家大公司需要廉價地備份大量數據。他們不需要隨機存取檔案；只需要安全地儲存它們。哪種儲存設備最適合且嚴格使用順序存取？", 
+                        options: ["固態硬碟 (SSD)", "磁帶 (Magnetic Tape)", "光碟 (DVD)", "快取記憶體 (Cache)"], 
+                        ans: 1,
+                        explanation: "磁帶要求讀取器順序捲動磁帶以尋找數據（就像舊式卡式錄音帶）。它對於隨機存取來說非常慢，但對於大量、長期的備份來說極其便宜且耐用。"
+                    }
+                ]
+            }
+        };
+
+        // Tab Logic
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white');
+                el.classList.add('bg-white', 'text-gray-600');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            
+            const activeBtn = document.getElementById('tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1));
+            activeBtn.classList.remove('bg-white', 'text-gray-600');
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Language Toggle Logic
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            updateContent();
+            renderQuiz();
+        }
+
+        function updateContent() {
+            const t = content[currentLang];
+            
+            // Header & Tabs
+            document.getElementById('title').innerText = t.title;
+            document.getElementById('langBtn').innerText = t.langBtn;
+            document.getElementById('tabHardware').innerText = t.tabHardware;
+            document.getElementById('tabCpu').innerText = t.tabCpu;
+            document.getElementById('tabMemory').innerText = t.tabMemory;
+            document.getElementById('tabQuiz').innerText = t.tabQuiz;
+
+            // Hardware
+            document.getElementById('hwTitle').innerText = t.hwTitle;
+            document.getElementById('hwDesc').innerText = t.hwDesc;
+            document.getElementById('inputOutput').innerText = t.inputOutput;
+            document.getElementById('ioDesc').innerText = t.ioDesc;
+            document.getElementById('inputLabel').innerText = t.inputLabel;
+            document.getElementById('ioListIn').innerHTML = t.ioListIn;
+            document.getElementById('outputLabel').innerText = t.outputLabel;
+            document.getElementById('ioListOut').innerHTML = t.ioListOut;
+            document.getElementById('processingUnits').innerText = t.processingUnits;
+            document.getElementById('puDesc').innerText = t.puDesc;
+            document.getElementById('puList').innerHTML = t.puList;
+            document.getElementById('busTitle').innerHTML = t.busTitle;
+            document.getElementById('busDesc').innerHTML = t.busDesc;
+            document.getElementById('dataBus').innerText = t.dataBus;
+            document.getElementById('dataBusDesc').innerText = t.dataBusDesc;
+            document.getElementById('addressBus').innerText = t.addressBus;
+            document.getElementById('addressBusDesc').innerText = t.addressBusDesc;
+            document.getElementById('controlBus').innerText = t.controlBus;
+            document.getElementById('controlBusDesc').innerText = t.controlBusDesc;
+            document.getElementById('guide1Title').innerText = t.guide1Title;
+            document.getElementById('guide1Desc').innerText = t.guide1Desc;
+
+            // CPU
+            document.getElementById('cpuTitle').innerText = t.cpuTitle;
+            document.getElementById('cpuMeasurement').innerText = t.cpuMeasurement;
+            document.getElementById('cpuSpeedDesc').innerHTML = t.cpuSpeedDesc;
+            document.getElementById('unitMicro').innerHTML = t.unitMicro;
+            document.getElementById('unitNano').innerHTML = t.unitNano;
+            document.getElementById('unitPico').innerHTML = t.unitPico;
+            document.getElementById('cycleTitle').innerText = t.cycleTitle;
+            document.getElementById('stepFetch').innerText = t.stepFetch;
+            document.getElementById('stepFetchSub').innerText = t.stepFetchSub;
+            document.getElementById('stepDecode').innerText = t.stepDecode;
+            document.getElementById('stepDecodeSub').innerText = t.stepDecodeSub;
+            document.getElementById('stepExecute').innerText = t.stepExecute;
+            document.getElementById('stepExecuteSub').innerText = t.stepExecuteSub;
+            document.getElementById('cycleDesc').innerHTML = t.cycleDesc;
+            document.getElementById('cycleList').innerHTML = t.cycleList;
+            document.getElementById('guide2Title').innerText = t.guide2Title;
+            document.getElementById('guide2Desc').innerHTML = t.guide2Desc;
+
+            // Memory
+            document.getElementById('memTitle').innerText = t.memTitle;
+            document.getElementById('primaryMem').innerText = t.primaryMem;
+            document.getElementById('primaryAnalogy').innerText = t.primaryAnalogy;
+            document.getElementById('primaryList').innerHTML = t.primaryList;
+            document.getElementById('secondaryStorage').innerText = t.secondaryStorage;
+            document.getElementById('storageAnalogy').innerText = t.storageAnalogy;
+            document.getElementById('storageList').innerHTML = t.storageList;
+            document.getElementById('perfTitle').innerText = t.perfTitle;
+            document.getElementById('perfList').innerHTML = t.perfList;
+            document.getElementById('unitsTitle').innerText = t.unitsTitle;
+            document.getElementById('unitsDesc').innerText = t.unitsDesc;
+            document.getElementById('guide3Title').innerText = t.guide3Title;
+            document.getElementById('guide3Desc').innerHTML = t.guide3Desc;
+
+            // Quiz
+            document.getElementById('quizTitle').innerText = t.quizTitle;
+            document.getElementById('quizSubtitle').innerText = t.quizSubtitle;
+            document.getElementById('submitQuiz').innerText = t.submitQuiz;
+            document.getElementById('retryQuiz').innerHTML = `<i class="fas fa-redo mr-2"></i> ${t.retryQuiz}`;
+            
+            // Reset Quiz UI if language changes
+            document.getElementById('quizResult').classList.add('hidden');
+            document.getElementById('submitQuiz').classList.remove('hidden');
+            document.getElementById('retryQuiz').classList.add('hidden');
+        }
+
+        // Quiz Logic
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+            const questions = content[currentLang].questions;
+
+            questions.forEach((q, qIndex) => {
+                let html = `<div class="quiz-question bg-white p-6 rounded-xl border border-gray-200 shadow-sm relative" id="qDiv${qIndex}">
+                    <p class="font-bold text-gray-800 mb-5 text-lg flex items-start"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm mr-3 mt-0.5">${qIndex + 1}</span> ${q.q}</p>
+                    <div class="space-y-3">`;
+                
+                q.options.forEach((opt, oIndex) => {
+                    html += `<label class="flex items-center space-x-3 cursor-pointer p-4 rounded-lg border-2 border-gray-100 quiz-option" onclick="selectOption(${qIndex}, ${oIndex})">
+                        <input type="radio" name="q${qIndex}" value="${oIndex}" class="form-radio h-5 w-5 text-blue-600 focus:ring-blue-500 hidden">
+                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-2 radio-custom">
+                            <div class="w-2.5 h-2.5 rounded-full bg-blue-600 hidden indicator"></div>
+                        </div>
+                        <span class="text-gray-700 font-medium text-base">${opt}</span>
+                    </label>`;
+                });
+                
+                html += `</div>
+                    <div class="explanation-box mt-6 p-5 rounded-lg text-base font-medium border" id="exp${qIndex}">
+                        <p class="flex items-start"><i class="fas fa-info-circle mr-3 mt-1 text-lg"></i><span>${q.explanation}</span></p>
+                    </div>
+                </div>`;
+                container.innerHTML += html;
+            });
+
+            // Reset buttons
+            document.getElementById('submitQuiz').classList.remove('hidden');
+            document.getElementById('retryQuiz').classList.add('hidden');
+            document.getElementById('quizResult').classList.add('hidden');
+        }
+
+        function selectOption(qIndex, oIndex) {
+            const qDiv = document.getElementById(`qDiv${qIndex}`);
+            // Check if already submitted
+            if (qDiv.classList.contains('submitted')) return;
+
+            const labels = qDiv.querySelectorAll('.quiz-option');
+            const inputs = qDiv.querySelectorAll('input');
+            
+            // Reset all in this question
+            labels.forEach(l => {
+                l.classList.remove('selected', 'border-blue-500');
+                l.querySelector('.indicator').classList.add('hidden');
+                l.querySelector('.radio-custom').classList.remove('border-blue-600');
+            });
+            
+            // Set selected
+            inputs[oIndex].checked = true;
+            labels[oIndex].classList.add('selected', 'border-blue-500');
+            labels[oIndex].querySelector('.indicator').classList.remove('hidden');
+            labels[oIndex].querySelector('.radio-custom').classList.add('border-blue-600');
+        }
+
+        function checkAnswers() {
+            const questions = content[currentLang].questions;
+            let score = 0;
+            let allAnswered = true;
+
+            // Check if all answered
+            questions.forEach((q, qIndex) => {
+                if (!document.querySelector(`input[name="q${qIndex}"]:checked`)) {
+                    allAnswered = false;
+                }
+            });
+
+            if (!allAnswered) {
+                const msg = currentLang === 'en' ? "Please answer all questions before submitting." : "請在提交前回答所有問題。";
+                alert(msg);
+                return;
+            }
+            
+            questions.forEach((q, qIndex) => {
+                const selectedInput = document.querySelector(`input[name="q${qIndex}"]:checked`);
+                const qDiv = document.getElementById(`qDiv${qIndex}`);
+                const labels = qDiv.querySelectorAll('.quiz-option');
+                const expBox = document.getElementById(`exp${qIndex}`);
+                
+                // Mark as submitted to disable clicks
+                qDiv.classList.add('submitted');
+                labels.forEach(l => l.classList.add('disabled', 'cursor-not-allowed'));
+                
+                const selectedVal = parseInt(selectedInput.value);
+                
+                if (selectedVal === q.ans) {
+                    score++;
+                    qDiv.classList.add('border-green-500', 'bg-green-50/30');
+                    labels[selectedVal].classList.add('correct');
+                    labels[selectedVal].classList.remove('selected', 'border-blue-500');
+                    labels[selectedVal].innerHTML += '<i class="fas fa-check text-green-500 ml-auto text-xl"></i>';
+                    
+                    expBox.classList.add('bg-green-50', 'text-green-800', 'border-green-200', 'active');
+                } else {
+                    qDiv.classList.add('border-red-500', 'bg-red-50/30');
+                    labels[selectedVal].classList.add('incorrect');
+                    labels[selectedVal].classList.remove('selected', 'border-blue-500');
+                    labels[selectedVal].innerHTML += '<i class="fas fa-times text-red-500 ml-auto text-xl"></i>';
+                    
+                    // Highlight correct answer
+                    labels[q.ans].classList.add('correct');
+                    labels[q.ans].innerHTML += '<i class="fas fa-check text-green-500 ml-auto text-xl"></i>';
+                    
+                    expBox.classList.add('bg-red-50', 'text-red-800', 'border-red-200', 'active');
+                }
+            });
+
+            const resultDiv = document.getElementById('quizResult');
+            resultDiv.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+            
+            const percentage = (score / questions.length) * 100;
+            let emoji = percentage === 100 ? "🎉" : percentage >= 50 ? "👍" : "💪";
+            const resultText = currentLang === 'en' ? `${emoji} You scored ${score} out of ${questions.length}! (${percentage}%)` : `${emoji} 你答對了 ${score} / ${questions.length} 題！ (${percentage}%)`;
+            resultDiv.innerText = resultText;
+
+            if (score === questions.length) {
+                resultDiv.classList.add('bg-green-100', 'text-green-800');
+            } else if (score > 0) {
+                resultDiv.classList.add('bg-yellow-100', 'text-yellow-800');
+            } else {
+                resultDiv.classList.add('bg-red-100', 'text-red-800');
+            }
+
+            // Swap buttons
+            document.getElementById('submitQuiz').classList.add('hidden');
+            document.getElementById('retryQuiz').classList.remove('hidden');
+            
+            // Scroll to top of quiz
+            document.getElementById('quiz').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize
+        renderQuiz();
+    </script>
+</body>
+</html>
