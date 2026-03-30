@@ -1,5 +1,7 @@
 # Basic Machine Organisation 
 
+<img width="1040" height="977" alt="image" src="https://github.com/user-attachments/assets/4434bc6b-98fc-4ae7-81d3-8b4a08a595c8" />
+
 This tool is designed specifically for students to easily grasp the fundamental concepts of how computer hardware works together. 
 
 ## 🎯 What will you learn?
